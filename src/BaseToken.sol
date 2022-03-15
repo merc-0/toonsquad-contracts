@@ -45,7 +45,7 @@ contract BaseToken is
                                                         // Allows burning while correctly counting the next tokenId.
     uint256 public maxSupply;                           // Cap on how many may be minted.
 
-    string internal _baseTokenURI;                      // Settable base url for tokens.
+    string internal _baseTokenURI;                      // Settable base uri for tokens.
                                                         // Creates tokenUri as: [_baseTokenURI]/[token number]
     mapping (uint256 => string) internal _tokenURIs;    // Can be manually set by OWNER_ROLE.
 
@@ -147,10 +147,9 @@ contract BaseToken is
         // Increment tracking.
         _totalBurned = _totalBurned + 1;
 
-        // Relay on inherited.
+        // Rely on inherited.
         super.burn(tokenId);
     }
-
 
 
     /* ----------------------------- Minter Methods ----------------------------- */

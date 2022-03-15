@@ -18,7 +18,9 @@ contract MockCaller {
         tokenContact.burn(id);
     }
 
-
+    function minterReserve(Minter minter, uint256 numToMint) public {
+        minter.reserveTokens(numToMint);
+    }
 
     function grantMinter(BaseToken tokenContact) public {
         tokenContact.grantRole(tokenContact.MINTER_ROLE(), address(this));

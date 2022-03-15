@@ -72,7 +72,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
     bool public saleIsActive;          // Sale live toggle.
     bool public signedMintIsActive;    // Whitelist/presale signed mint live toggle.
 
-    mapping (address => uint256) totalMinted;  // Track per minter total they minted.
+    mapping (address => uint256) public totalMinted;  // Track per minter total they minted.
 
 
     /* --------------------------------- Events --------------------------------- */
@@ -86,7 +86,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
      */
     modifier onlyAdmin() {
         require(
-            hasRole(ADMIN_ROLE, _msgSender()),
+            hasRole(ADMIN_ROLE, msg.sender),
             "onlyAdmin: caller is not the admin");
         _;
     }
@@ -100,8 +100,8 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
     ) PaymentSplitter(payees, shares_) {
 
         tokenContract = _tokenContract;
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(ADMIN_ROLE, _msgSender());
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, msg.sender);
     }
 
 
@@ -130,7 +130,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
 
     function reserveTokens(uint256 num) public onlyAdmin {
         for (uint256 i = 0; i < num; i++) {
-            IBaseToken(tokenContract).mint(_msgSender());
+            IBaseToken(tokenContract).mint(msg.sender);
         }
     }
 
@@ -178,7 +178,10 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
             signature
         );
         require(signatureIsValid, "Minter: invalid signature");
-        require((totalMinted[msg.sender] + numberOfTokens) <= maxPermitted, "Minter: combined totalMinted exceeds maxPermitted");
+        require(
+            (totalMinted[msg.sender] + numberOfTokens) <= maxPermitted,
+            "Minter: combined totalMinted exceeds maxPermitted"
+        );
 
         sharedMintBehavior(numberOfTokens);
     }
@@ -229,7 +232,10 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
 
         // Save gas by failing early.
         uint256 currentTotal = IBaseToken(tokenContract).totalMinted();
-        require(currentTotal + numberOfTokens <= IBaseToken(tokenContract).maxSupply(), "Minter: Purchase would exceed max supply");
+        require(
+            currentTotal + numberOfTokens <= IBaseToken(tokenContract).maxSupply(),
+            "Minter: Purchase would exceed max supply"
+        );
 
         if(maxWalletPurchase != 0) {
             totalMinted[msg.sender] += numberOfTokens;
@@ -242,7 +248,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
 
         // Return the change.
         if(expectedValue < msg.value) {
-            payable(_msgSender()).call{value: msg.value-expectedValue}("");
+            payable(msg.sender).call{value: msg.value-expectedValue}("");
         }
     }
 

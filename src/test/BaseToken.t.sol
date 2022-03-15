@@ -95,6 +95,36 @@ contract BaseTest is DSTest {
         assertEq(baseToken.totalBurned(), 1);
     }
 
+    function testBurnThenMint() public {
+        
+        // Setup.
+        baseToken.mint(address(this));
+        assertEq(baseToken.balanceOf(address(this)), 1);
+        assertEq(baseToken.totalSupply(), 1);
+        assertEq(baseToken.totalMinted(), 1);
+
+        // Burn.
+        baseToken.burn(1);
+        assertEq(baseToken.balanceOf(address(this)), 0);
+        assertEq(baseToken.totalSupply(), 0);
+        assertEq(baseToken.totalMinted(), 1);
+        assertEq(baseToken.totalBurned(), 1);
+
+        // Mint again.
+        baseToken.mint(address(this));
+        assertEq(baseToken.balanceOf(address(this)), 1);
+        assertEq(baseToken.totalSupply(), 1);
+        assertEq(baseToken.totalMinted(), 2);
+        assertEq(baseToken.totalBurned(), 1);
+
+        // Burn again.
+        baseToken.burn(2);
+        assertEq(baseToken.balanceOf(address(this)), 0);
+        assertEq(baseToken.totalSupply(), 0);
+        assertEq(baseToken.totalMinted(), 2);
+        assertEq(baseToken.totalBurned(), 2);
+    }
+
     function testFailBurn() public {
         baseToken.mint(address(this));
         mockCaller.burnOne(baseToken, 1);
