@@ -170,6 +170,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
     {
 
         require(signedMintIsActive, "Minter: signedMint is not active");
+        require(maxWalletPurchase > 0, "Minter: Max per wallet required for signedMint");
         require(numberOfTokens <= maxPermitted, "Minter: numberOfTokens exceeds maxPermitted");
 
         bool signatureIsValid = SignatureChecker.isValidSignatureNow(
