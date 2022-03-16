@@ -25,10 +25,23 @@ contract MinterTest is DSTest {
     uint256 internal privateKey = 0xBEEF;
     address internal minterSigner = hevm.addr(privateKey);
 
+
+    function signPayload(Minter mintContract, uint256 sk, address accountToMint, uint256 maxPermitted)
+        internal
+        returns(bytes memory)
+    {
+        (uint8 v, bytes32 r, bytes32 s) = hevm.sign(
+            sk,
+            mintContract.hashTransaction(accountToMint, maxPermitted)
+        );
+        return abi.encodePacked(r, s, v);
+    }
+
     function setUp() public virtual {
         baseToken = new BaseToken(name, symbol);
         mockCaller = new MockCaller();
         minter = new Minter(address(baseToken), payees, shares);
+        minter.setMintSigner(minterSigner);
 
         baseToken.grantRole(baseToken.MINTER_ROLE(), address(minter));
         baseToken.setMaxSupply(50);
@@ -174,9 +187,110 @@ contract MinterTest is DSTest {
 
 
     /* ------------------------------- Signed Mint ------------------------------ */
-    // function testFailSignedMintNotActive() public {
-    //     minter.signedMint(1, 1, 0x00);
-    // }
+    function testFailSignedMintNotActive() public {
+        // Setup.
+        minter.setPrice(0.08 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+    }
+
+    function testFailSignedMintPriceNotSet() public {
+        // Setup.
+        minter.flipSignedMintState();
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+    }
+
+    function testSignedMint() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.08 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+
+        assertEq(baseToken.balanceOf(address(this)), 1);
+        assertEq(baseToken.totalSupply(), 1);
+        assertEq(baseToken.totalMinted(), 1);
+    }
+
+    function testSignedMintTwoPurchases() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.08 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+
+        assertEq(baseToken.balanceOf(address(this)), 2);
+        assertEq(baseToken.totalSupply(), 2);
+        assertEq(baseToken.totalMinted(), 2);
+    }
+
+    function testFailSignedMintOverMax() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.08 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(3, 5, sig);
+        minter.signedMint{ value: 0.08 ether }(3, 5, sig);
+    }
+
+    function testFailSignedMintNumTokensZero() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.08 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(0, 5, sig);
+    }
+
+    function testFailSignedMintPriceZero() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.08 ether);
+        minter.setPrice(0 ether);
+        bytes memory sig = signPayload(minter, privateKey, address(this), 5);
+
+        minter.signedMint{ value: 0.08 ether }(1, 5, sig);
+    }
+
+    function testFailSignedMintAboveMaxSupply() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.008 ether);
+
+        uint256 maxPlus1 = baseToken.maxSupply() + 1;
+        bytes memory sig = signPayload(minter, privateKey, address(this), maxPlus1);
+
+        minter.signedMint{ value: (0.008 ether) * maxPlus1 }(maxPlus1, maxPlus1, sig);
+    }
+
+    function testMintMaxSupply() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.008 ether);
+
+        uint256 max = baseToken.maxSupply();
+        bytes memory sig = signPayload(minter, privateKey, address(this), max);
+
+        minter.signedMint{ value: (0.008 ether) * max }(max, max, sig);
+    }
+
+    function testMintMaxWallet() public {
+        // Setup.
+        minter.flipSignedMintState();
+        minter.setPrice(0.008 ether);
+        minter.setMaxWalletPurchase(8);
+
+        bytes memory sig = signPayload(minter, privateKey, address(this), 8);
+
+        minter.signedMint{ value: 0.008 ether * 8 }(1, 8, sig);
+    }
 
 
     /* -------------------------------- Claiming -------------------------------- */
