@@ -190,6 +190,7 @@ contract MinterTest is DSTest {
     function testFailSignedMintNotActive() public {
         // Setup.
         minter.setPrice(0.08 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(1, 5, sig);
@@ -198,6 +199,7 @@ contract MinterTest is DSTest {
     function testFailSignedMintPriceNotSet() public {
         // Setup.
         minter.flipSignedMintState();
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(1, 5, sig);
@@ -207,6 +209,7 @@ contract MinterTest is DSTest {
         // Setup.
         minter.flipSignedMintState();
         minter.setPrice(0.08 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(1, 5, sig);
@@ -220,6 +223,7 @@ contract MinterTest is DSTest {
         // Setup.
         minter.flipSignedMintState();
         minter.setPrice(0.08 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(1, 5, sig);
@@ -234,6 +238,7 @@ contract MinterTest is DSTest {
         // Setup.
         minter.flipSignedMintState();
         minter.setPrice(0.08 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(3, 5, sig);
@@ -244,6 +249,7 @@ contract MinterTest is DSTest {
         // Setup.
         minter.flipSignedMintState();
         minter.setPrice(0.08 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(0, 5, sig);
@@ -254,6 +260,7 @@ contract MinterTest is DSTest {
         minter.flipSignedMintState();
         minter.setPrice(0.08 ether);
         minter.setPrice(0 ether);
+        minter.setMaxWalletPurchase(5);
         bytes memory sig = signPayload(minter, privateKey, address(this), 5);
 
         minter.signedMint{ value: 0.08 ether }(1, 5, sig);
@@ -265,6 +272,7 @@ contract MinterTest is DSTest {
         minter.setPrice(0.008 ether);
 
         uint256 maxPlus1 = baseToken.maxSupply() + 1;
+        minter.setMaxWalletPurchase(maxPlus1);
         bytes memory sig = signPayload(minter, privateKey, address(this), maxPlus1);
 
         minter.signedMint{ value: (0.008 ether) * maxPlus1 }(maxPlus1, maxPlus1, sig);
@@ -276,6 +284,7 @@ contract MinterTest is DSTest {
         minter.setPrice(0.008 ether);
 
         uint256 max = baseToken.maxSupply();
+        minter.setMaxWalletPurchase(max);
         bytes memory sig = signPayload(minter, privateKey, address(this), max);
 
         minter.signedMint{ value: (0.008 ether) * max }(max, max, sig);
