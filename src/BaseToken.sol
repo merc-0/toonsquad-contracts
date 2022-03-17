@@ -47,7 +47,7 @@ contract BaseToken is
 
     string internal _baseTokenURI;                      // Settable base uri for tokens.
                                                         // Creates tokenUri as: [_baseTokenURI]/[token number]
-    mapping (uint256 => string) internal _tokenURIs;    // Can be manually set by OWNER_ROLE.
+    mapping (uint256 => string) internal _tokenURIs;    // Can be manually set by DEFAULT_ADMIN_ROLE.
 
 
     /* -------------------------------- Modifiers ------------------------------- */
@@ -65,7 +65,7 @@ contract BaseToken is
     /* ------------------------------- Constructor ------------------------------ */
 
     /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE` and `OWNER_ROLE` to the
+     * @dev Grants `DEFAULT_ADMIN_ROLE` and `owner` to the
      * account that deploys the contract.
      */
     constructor(

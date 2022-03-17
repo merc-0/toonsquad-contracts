@@ -70,7 +70,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
     uint256 public price;              // Ether price per token.
     uint256 public maxWalletPurchase;  // Total max that may be purchased by one address.
     bool public saleIsActive;          // Sale live toggle.
-    bool public signedMintIsActive;    // Whitelist/presale signed mint live toggle.
+    bool public signedMintIsActive;    // Presale signed mint live toggle.
 
     mapping (address => uint256) public totalMinted;  // Track per minter total they minted.
 
@@ -158,7 +158,7 @@ contract Minter is AccessControlEnumerable, Provenance, PaymentSplitter {
     }
 
 
-    /* ----------------------------- Whitelist Mint ----------------------------- */
+    /* ------------------------------- Signed Mint ------------------------------ */
 
     function signedMint(
         uint256 numberOfTokens,
