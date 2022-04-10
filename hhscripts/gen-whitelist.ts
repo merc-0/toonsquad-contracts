@@ -13,7 +13,7 @@ export const readWhitelistCSV = (filePath: string): Promise<any[]> => {
       const results: any[] = [];
   
       createReadStream(filePath)
-        .pipe(csv(["address"]))
+        .pipe(csv(["address", "max"]))
         .on("data", (data: any) => results.push(data))
         .on("end", () => {
           resolve(results);
